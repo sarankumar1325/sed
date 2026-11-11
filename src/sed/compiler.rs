@@ -1163,6 +1163,9 @@ pub fn compile_subst_flags(
             }
 
             'p' => {
+                if subst.print_flag {
+                    return compilation_error(lines, line, "multiple `p' options to `s' command");
+                }
                 subst.print_flag = true;
                 // 'p' is applied before 'e' iff 'e' has not been seen yet.
                 subst.p_before_e = !subst.execute;
@@ -2860,6 +2863,21 @@ mod tests {
             err.to_string()
                 .contains(":3: error: multiple `g' options to `s' command")
         );
+    }
+
+    #[test]
+    fn test_compile_subst_flag_multiple_p_should_fail() {
+        for flags in ["pp", "pgp"] {
+            let (lines, mut chars) = make_providers(flags);
+            let mut subst = Substitution::default();
+
+            let err = compile_subst_flags(&lines, &mut chars, &mut subst, &mut ctx()).unwrap_err();
+            assert!(
+                err.to_string()
+                    .contains("multiple `p' options to `s' command"),
+                "{flags}: {err}"
+            );
+        }
     }
 
     #[test]

@@ -4069,3 +4069,15 @@ fn test_relative_range_blank_or_missing_number() {
             .stdout_is(expected);
     }
 }
+
+#[test]
+fn test_subst_repeated_p_flag_rejected() {
+    for script in ["s/a/b/pp", "s/a/b/pgp"] {
+        new_ucmd!()
+            .arg(script)
+            .pipe_in("a\n")
+            .fails()
+            .code_is(1)
+            .stderr_contains("multiple `p' options to `s' command");
+    }
+}
